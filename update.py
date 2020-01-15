@@ -7,7 +7,7 @@ import utils
 def update_channel(name : str, codes : list):
 	header_parts = []
 	for code in codes:
-		res = utils.toss_get('/courses/' + code)
+		res = utils.toss_api('/courses/' + code)
 		if res.status_code == 200:
 			# TODO: ignore outdated courses with same channel name but different course code
 			header_parts.append(utils.channel_header(res.json()))
@@ -15,17 +15,15 @@ def update_channel(name : str, codes : list):
 			print('TOSS did not find', code)
 	header = ' | '.join(header_parts)
 
-	res = utils.mm_request(f'/teams/{utils.VOWI_TEAMID}/channels/name/{name}')
+	res = utils.mm_api(f'/teams/{utils.VOWI_TEAMID}/channels/name/{name}')
 	if res.status_code == 200:
 		channel = res.json()
-		utils.mm_request(method='put', path=f'/channels/{channel["id"]}/patch',
+		utils.mm_api(method='put', path=f'/channels/{channel["id"]}/patch',
 				json={'header': header})
 	else:
 		print('Mattermost did not find', name)
 
-def update_all():
-	conn = sqlite3.connect(utils.DBFILE)
-	cur = conn.cursor()
+def update_all(cur):
 	cur.execute('SELECT name, code FROM code_to_name')
 
 	name2codes = collections.defaultdict(list)
@@ -36,4 +34,5 @@ def update_all():
 		update_channel(name, codes)
 
 if __name__ == '__main__':
-	update_all()
+	conn = sqlite3.connect(utils.DBFILE)
+	update_all(conn.cursor())

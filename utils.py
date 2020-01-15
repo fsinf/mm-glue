@@ -7,20 +7,25 @@ import config
 _MATTERMOST = 'https://mattermost.fsinf.at'
 _MATTERMOST_API = _MATTERMOST + '/api/v4'
 _TOSS_API = 'https://toss.fsinf.at/api'
-_VOWI_API = 'https://vowi.fsinf.at/api.php'
+_VOWI = 'https://vowi.fsinf.at'
+_VOWI_API = _VOWI + '/api.php'
 _USER_AGENT = 'MM-Glue (https://github.com/fsinf/mm-glue)'
 
+VOWI_PAGE_PREFIX = _VOWI + '/wiki/'
 CHANNEL_PREFIX = _MATTERMOST + '/w-inf-tuwien/channels/'
 VOWI_TEAMID = 'sswtb6oqciyyfmkibh6mjz479w'
 DBFILE = 'database.sqlite'
 
-def mm_request(path, method='get', **kwargs):
+def mm_api(path, method='get', **kwargs):
 	return requests.request(method, _MATTERMOST_API + path, **kwargs,
 			headers={'Authorization': 'Bearer ' + config.MM_TOKEN,
 				'User-Agent': _USER_AGENT})
 
-def toss_get(path, **kwargs):
+def toss_api(path, **kwargs):
 	return requests.get(_TOSS_API + path, **kwargs, headers={'User-Agent': _USER_AGENT})
+
+def vowi_api(**params):
+	return requests.get(_VOWI_API, params=params, headers={'User-Agent': _USER_AGENT})
 
 def channel_name(title_de):
 	title_de = title_de.replace('für Informatik und Wirtschaftsinformatik', '')

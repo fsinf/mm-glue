@@ -20,26 +20,26 @@ def channel_by_course_code(code):
 	conn = sqlite3.connect(utils.DBFILE)
 	cur = conn.cursor()
 	cur.execute('SELECT name FROM code_to_name WHERE code = ?', (code,))
-	channel = cur.fetchone()
+	row = cur.fetchone()
 
-	if channel is not None:
-		return bottle.redirect(utils.CHANNEL_PREFIX + channel[0])
+	if row is not None:
+		return bottle.redirect(utils.CHANNEL_PREFIX + row[0])
 
-	res = utils.toss_get('/courses/' + code)
+	res = utils.toss_api('/courses/' + code)
 	if res.status_code != 200:
 		return bottle.HTTPError(404, 'TOSS could not find this course')
 
 	course = res.json()
 	chname = utils.channel_name(course['name_de'])
 
-	res = utils.mm_request(f'/teams/{utils.VOWI_TEAMID}/channels/name/{chname}')
+	res = utils.mm_api(f'/teams/{utils.VOWI_TEAMID}/channels/name/{chname}')
 
 	if res.status_code == 200:
 		cur.execute('INSERT INTO code_to_name (code, name) VALUES (?, ?)', (code, chname))
 		conn.commit()
 		return bottle.redirect(utils.CHANNEL_PREFIX + chname)
 
-	res = utils.toss_get(course['machine']['instanceof'])
+	res = utils.toss_api(course['machine']['instanceof'])
 	res.raise_for_status()
 
 	if not any([_infrelated(gm['catalog']) for gm in res.json()]):
@@ -53,7 +53,7 @@ def channel_by_course_code(code):
 			f'<form method=post><button>Create channel "{html.escape(chname)}"</button></form>'
 
 	elif bottle.request.method == 'POST':
-		res = utils.mm_request('/channels', method='post', json={
+		res = utils.mm_api('/channels', method='post', json={
 			'team_id': utils.VOWI_TEAMID,
 			'name': chname,
 			'display_name': course['name_de'][:64],
