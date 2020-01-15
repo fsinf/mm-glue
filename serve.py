@@ -19,7 +19,7 @@ def _infrelated(catalog):
 def channel_by_course_code(code):
 	conn = sqlite3.connect(utils.DBFILE)
 	cur = conn.cursor()
-	cur.execute('SELECT name FROM channels WHERE code = ?', (code,))
+	cur.execute('SELECT name FROM code_to_name WHERE code = ?', (code,))
 	channel = cur.fetchone()
 
 	if channel is not None:
@@ -30,12 +30,12 @@ def channel_by_course_code(code):
 		return bottle.HTTPError(404, 'TOSS could not find this course')
 
 	course = res.json()
-	chname = utils.mm_channel_name(course['name_de'])
+	chname = utils.channel_name(course['name_de'])
 
-	channel = utils.mm_request(f'/teams/{utils.VOWI_TEAMID}/channels/name/{chname}')
+	res = utils.mm_request(f'/teams/{utils.VOWI_TEAMID}/channels/name/{chname}')
 
-	if channel.status_code == 200:
-		cur.execute('INSERT INTO channels (name, code) VALUES (?, ?)', (chname, code))
+	if res.status_code == 200:
+		cur.execute('INSERT INTO code_to_name (code, name) VALUES (?, ?)', (code, chname))
 		conn.commit()
 		return bottle.redirect(utils.CHANNEL_PREFIX + chname)
 
@@ -57,10 +57,11 @@ def channel_by_course_code(code):
 			'team_id': utils.VOWI_TEAMID,
 			'name': chname,
 			'display_name': course['name_de'][:64],
+			'header': utils.channel_header(course),
 			'type': 'O'
 		})
 		if res.status_code == 201:
-			cur.execute('INSERT INTO channels (name, code) VALUES (?, ?)', (chname, code))
+			cur.execute('INSERT INTO code_to_name (code, name) VALUES (?, ?)', (code, chname))
 			conn.commit()
 			return bottle.redirect(utils.CHANNEL_PREFIX + chname)
 		else:

@@ -12,9 +12,17 @@ _USER_AGENT = 'MM-Glue (https://github.com/fsinf/mm-glue)'
 
 CHANNEL_PREFIX = _MATTERMOST + '/w-inf-tuwien/channels/'
 VOWI_TEAMID = 'sswtb6oqciyyfmkibh6mjz479w'
-DBFILE = 'channels.db'
+DBFILE = 'database.sqlite'
 
-def mm_channel_name(title_de):
+def mm_request(path, method='get', **kwargs):
+	return requests.request(method, _MATTERMOST_API + path, **kwargs,
+			headers={'Authorization': 'Bearer ' + config.MM_TOKEN,
+				'User-Agent': _USER_AGENT})
+
+def toss_get(path, **kwargs):
+	return requests.get(_TOSS_API + path, **kwargs, headers={'User-Agent': _USER_AGENT})
+
+def channel_name(title_de):
 	title_de = title_de.replace('für Informatik und Wirtschaftsinformatik', '')
 	chname = title_de.lower().replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue')
 	chname = re.sub('[^a-zA-Z0-9_]', '-', chname)
@@ -30,10 +38,7 @@ def mm_channel_name(title_de):
 
 	return chname
 
-def mm_request(path, method='get', **kwargs):
-	return requests.request(method, _MATTERMOST_API + path, **kwargs,
-			headers={'Authorization': 'Bearer ' + config.MM_TOKEN,
-				'User-Agent': _USER_AGENT})
-
-def toss_get(path, **kwargs):
-	return requests.get(_TOSS_API + path, **kwargs, headers={'User-Agent': _USER_AGENT})
+def channel_header(course):
+	return f'{course["course_type"]} ({course["first_lecturer_lastname"]}): '\
+		+ ', '.join([f'[{label}]({url})' for label, url in course['human'].items()
+	                  if label != 'mattermost'])
