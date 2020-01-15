@@ -1,0 +1,10 @@
+[Unit]
+Description=TOSS Glue HTTP API
+
+[Service]
+User=tossglue
+WorkingDirectory=/home/tossglue/mm-glue
+ExecStart=/home/tossglue/mm-glue/serve.py
+
+[Install]
+WantedBy=multi-user.target
