@@ -2,9 +2,10 @@
 Description=TOSS Glue HTTP API
 
 [Service]
-User=tossglue
-WorkingDirectory=/home/tossglue/mm-glue
-ExecStart=/home/tossglue/mm-glue/serve.py
+WorkingDirectory=/%h/mm-glue/
+ExecStart=/usr/bin/python3 serve.py
+Restart=always
+RestartSec=30
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
