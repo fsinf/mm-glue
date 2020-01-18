@@ -5,7 +5,7 @@
 	sudo useradd -r -m tossglue
 	sudo loginctl enable-linger tossglue
 	sudo apt install python3-pip
-	sudo su tossglue
+	sudo su - tossglue
 
 	git clone https://github.com/fsinf/mm-glue
 	cd ~/mm-glue
