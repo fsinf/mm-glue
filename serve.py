@@ -69,4 +69,4 @@ def channel_by_course_code(code):
 			return bottle.HTTPError(500, 'Channel creation failed')
 
 if __name__ == '__main__':
-	bottle.run()
+	bottle.run(port=8180)
