@@ -1,3 +1,4 @@
+# crontab ./mm-glue/crontab.txt
+
 0 0 * * * ./mm-glue/update.py
 0 6 * * * ./mm-glue/spam_vowi_changes.py 24
-
