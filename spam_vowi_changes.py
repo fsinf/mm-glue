@@ -3,7 +3,6 @@ import argparse
 import collections
 from datetime import datetime, timedelta
 import sqlite3
-import sys
 
 import utils
 
@@ -47,18 +46,30 @@ def spam_vowi_changes(cur, lasthours):
 			print('mattermost did not find channel', chname)
 			continue
 
-		revids = collections.defaultdict(lambda: 0)
-		old_revids = collections.defaultdict(lambda: sys.maxsize)
+		revids = {}
+		old_revids = {}
 
 		for change in changes:
-			revids[change['title']] = max(revids[change['title']], change['revid'])
-			old_revids[change['title']] = min(old_revids[change['title']], change['old_revid'])
+			if change['title'] in revids:
+				revids[change['title']] = max(revids[change['title']], change['revid'])
+				old_revids[change['title']] = min(old_revids[change['title']], change['old_revid'])
+			else:
+				revids[change['title']] = change['revid']
+				old_revids[change['title']] = change['old_revid']
 
 		message = MESSAGE_HEADER.format(lasthours)
 
 		for title, revid in revids.items():
-			diffpage = f'Special:Diff/{old_revids[title]}/{revid}'
-			message += f'* [{title}]({utils.VOWI_PAGE_PREFIX + title}) ([diff]({utils.VOWI_PAGE_PREFIX + diffpage}))\n'
+			if old_revids[title] == 0:
+				detail = 'NEW'
+			else:
+				diffpage = f'Special:Diff/{old_revids[title]}/{revid}'
+				detail = f'[diff]({utils.VOWI_PAGE_PREFIX + diffpage})'
+			if '/' in title:
+				label = title.split('/', maxsplit=1)[1]
+			else:
+				label = title
+			message += f'* [{label}]({utils.VOWI_PAGE_PREFIX + title}) ({detail})\n'
 
 		channel = res.json()
 		res = utils.mm_api(method='post', path='/posts', json=dict(channel_id=channel['id'], message=message))
