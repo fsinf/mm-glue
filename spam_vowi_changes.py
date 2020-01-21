@@ -3,6 +3,7 @@ import argparse
 import collections
 from datetime import datetime, timedelta
 import sqlite3
+import urllib.parse
 
 import utils
 
@@ -69,7 +70,7 @@ def spam_vowi_changes(cur, lasthours):
 				label = title.split('/', maxsplit=1)[1]
 			else:
 				label = title
-			message += f'* [{label}]({utils.VOWI_PAGE_PREFIX + title}) ({detail})\n'
+			message += f'* [{label}]({utils.VOWI_PAGE_PREFIX + urllib.parse.quote(title)}) ({detail})\n'
 
 		channel = res.json()
 		res = utils.mm_api(method='post', path='/posts', json=dict(channel_id=channel['id'], message=message))
