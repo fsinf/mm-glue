@@ -39,10 +39,7 @@ def channel_by_course_code(code):
 		conn.commit()
 		return bottle.redirect(utils.CHANNEL_PREFIX + chname)
 
-	res = utils.toss_api(course['machine']['instanceof'])
-	res.raise_for_status()
-
-	if not any([_infrelated(gm['catalog']) for gm in res.json()]):
+	if not any([_infrelated(x) for x in course['mapping']]):
 		return bottle.HTTPError(403, 'mattermost.fsinf.at is only for informatics related courses'\
 				' and this course does not seem to be associated with'\
 				' Informatics, Business Informatics or the Transferable Skills.')
