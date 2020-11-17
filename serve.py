@@ -13,7 +13,8 @@ def index():
 
 def _infrelated(catalog):
 	return catalog['subject_de'] in ('Informatik', 'Wirtschaftsinformatik')\
-		or catalog['name_de'] == 'Transferable Skills'
+		or catalog['name_de'] == 'Transferable Skills'\
+		or catalog['name_de'] == 'Katalog Für alle Hörerinnen/Hörer'
 
 @bottle.route('/channel_by_course_code/<code:re:[A-Z0-9]{6}>', method=('GET', 'POST'))
 def channel_by_course_code(code):
